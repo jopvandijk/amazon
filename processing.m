@@ -1,6 +1,6 @@
-%% Modos
+    %% Modos
 tic
-calcularblacklist = 0; %r.49
+calcularblacklist = 1; %r.49
 firsttime=1; % If first time, filenames will be saved
 calcular = 1;
 %% Informação
@@ -53,20 +53,31 @@ for organize = 1
         %     save('blacklists.mat',blalt1,blalt3)
         
         % Ik maak aparte blacklists per reden van verwijderen en per databron (1,2,3).
-        blcorrupt1 = ones(1,2912); % Corrupte radiosondes met maar 1 datapunt. 23 stuks
-        blwet1 = ones(1,2912); % Corrupte radiosondes met een stijgende luchtvochtigheid. ±?
-        blsummask3 = ones(1,2912); % Voor deze radiosondes zijn alle radiometerdata corrupt. ±46
-        blachou3 = ones(1,2912); % Voor deze radiosondes zijn radiometerdata beschikbaar. ±1240, mutually exclusive with the above
-        blalt1 = ones(1,2912); % Radiosondes die de 10 km niet bereiken.
-        blrh1 = ones(1,2912); % Radiosondes met rh > 1. 0
-        blrh2 = ones(1,2912); % Reanalyses met rh > 1. 0
-        blrh3 = ones(1,2912); % Radiometers met rh > 1. ±1062 Hoe kan dit?
+        blcorrupt1 = []; % Corrupte radiosondes met maar 1 datapunt. 23 stuks
+        blwet1 = []; % Corrupte radiosondes met een stijgende luchtvochtigheid. ±?
+        blsummask3 = []; % Voor deze radiosondes zijn alle radiometerdata corrupt. ±46
+        blachou3 = []; % Voor deze radiosondes zijn radiometerdata beschikbaar. ±1240, mutually exclusive with the above
+        blalt1 = []; % Radiosondes die de 10 km niet bereiken. Waarom niet?
+        blrh1 = []; % Radiosondes met rh > 1. 0
+        blrh2 = []; % Reanalyses met rh > 1. 0
+        blrh3 = []; % Radiometers met rh > 1. ±1062 Hoe kan dit?
         %blachou3, blrh3, blsummask3 seem mutually exclusive
     else
         load('blacklists.mat')
         whiteblack = ones(1,length(nomes1)); % binaire versie van de blacklist
-        whiteblack = whiteblack.*blcorrupt1.*blalt1.*blrh1.*blrh2.*blrh3;
-        whitelist = find(whiteblack==1);
+        whiteblack(blcorrupt1)=0;
+        whiteblack(blalt1)=0;
+        whiteblack(blrh1)=0;
+        whiteblack(blrh2)=0;
+        whiteblack(blrh3)=0;
+        whitelist = nan(1,sum(whiteblack));
+        j = 1;
+        for i = 1:length(whiteblack)
+            if whiteblack(i) == 1
+                whitelist(j) = i;
+                j = j + 1;
+            end
+        end
     end
     j=1;
     
@@ -226,7 +237,7 @@ for loop = whitelist(1:end)
             z1(2)=z1(1)-1; % Diferente para não ser excluida depois, menos para poder tirar depois (±l.276)
             T1(2)=25;
             rh1(2)=90;
-            blcorrupt1(loop)=0;
+            blcorrupt1=[blcorrupt1 loop];
         end
     end
     
@@ -268,9 +279,10 @@ for loop = whitelist(1:end)
 
     % Determinar quais dados são corruptos com rh>1.
     if calcularblacklist == 1
-    	if rh1(1)>1;blwet1(loop)=0;end 
-        if max(rh1)>1;max(rh1),blrh1(loop)=0;end
-        if z1(end)<10.e3; blalt1(loop)=0;end %add && z1(end)>z1(1) to be more exclusive
+        if max(rh1)>1;max(rh1),blrh1=[blrh1 loop];end %#ok<AGROW>
+    	if rh1(1)>1;blwet1=[blwet1 loop];end %#ok<AGROW>
+        if z1(end)<10.e3; blalt1 = [blalt1 loop];end %#ok<AGROW>
+%        if z1(end)>z1(1) && z1(end)<10.e3; blalt1 = [blalt1 loop];end;end %#ok<AGROW> % Alternativa para contar os fracos só  
     end
     %% 2. Reanálise
     % Vou achar o primeiro horário da ERA maior que a sonda para pegar o arquivo desse mes.
@@ -437,10 +449,13 @@ bltirarrh1 = find(rh1de2(end-8,:)<0.1);
 blfriodemais1 = find(T1de2(end-31:end,:)<0);
 % bltirarrh1 = 
 %% Salvar dados
-whitelist1bin = blcorrupt1.*blwet1.*bltirarT1.*bltirarrh1;
+whitelist1bin = ones(1,n12);
+whitelist1bin(blcorrupt1) = 0;
+whitelist1bin(blwet1) = 0;
+whitelist1bin(bltirarT1) = 0;
+whitelist1bin(bltirarrh1) = 0;
 whitelist1 = find(whitelist1bin==1);
 
-whitelist3bin = indices3de1(find(summask3>0)) %hier een .* weggehaald, weet niet zeker of daar nog iets achter stond
 whitelist3bin = zeros(1,n3);
 whitelist3bin(indices3de1(find(summask3>0))) = 1;
 whitelist3bin(indices3de1(blrh3)) = 0;
