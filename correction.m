@@ -1,7 +1,5 @@
-% %% Preparação
+%% Correction 1: the vertical profile
 clc
-%? sondas = fieldnames(data);
-%% Correção 1: o perfil vertical
 load('processedData.mat') %from processing r.458
 load('correctionValues.mat') %from analysis r.930
 T2 = T2 + correction1.T2;
@@ -9,8 +7,8 @@ rh2 = rh2 + correction1.rh2;
 T3 = T3 + correction1.T3;
 rh3 = rh3 + correction1.rh3;
 save('correctedData1.mat', ...
-'horarios12','horarios12b','horarios3','meses12','meses3','horas12','horas3',...
-'nomes1','nomes2','nomes3','i12','i3','indices3de2','indices1raw',...
+'times12','horarios12b','times3','months12','months3','hours12','hours3',...
+'files1','files2','files3','i12','i3','indices3de2','indices1raw',...
 'z1','z2','rh1de2','P1de2','T1de2','P2','q2','q1de2','T2','rh2','P3','T3','rh3','q3','q1de3','rh1de3','T1de3','z3')
 % prefiltros12{5} = horas12>=17 & horas12<=19 & whitelist1bin == 1; %nt
 % prefiltros12{6} = meses12>=5 & meses12<=10 & whitelist1bin == 1; %seca
@@ -26,7 +24,8 @@ save('correctedData1.mat', ...
 %     end
 % end
 %interpolate z2, rh2, T2?
-%% Correção 2: o perfil vertical por horário
+
+%% Correction 2: vertical profile by time of day
 load('processedData.mat') %from processing r.458
 load('correctionValues.mat') %from analysis r.930
 for i=1:5
@@ -36,8 +35,8 @@ for i=1:5
     rh3(:,filtros3{i}) = rh3(:,filtros3{i}) + correction2.rh3(:,i);
 end
 save('correctedData2.mat', ...
-'horarios12','horarios12b','horarios3','meses12','meses3','horas12','horas3',...
-'nomes1','nomes2','nomes3','i12','i3','indices3de2','indices1raw',...
+'times12','horarios12b','times3','months12','months3','hours12','hours3',...
+'files1','files2','files3','i12','i3','indices3de2','indices1raw',...
 'z1','z2','rh1de2','P1de2','T1de2','P2','q2','q1de2','T2','rh2','P3','T3','rh3','q3','q1de3','rh1de3','T1de3','z3')
 
 % correctionValues2 = fieldnames(correction2);
@@ -63,7 +62,8 @@ save('correctedData2.mat', ...
 %     end
 % end
 % %interpolate z2, rh2, T2?
-%% Correção 3: o perfil na vertical por horário por mes
+
+%% Correction 3: vertical profile by time of day per month
 load('processedData.mat') %from processing r.458
 load('correctionValues.mat') %from analysis r.930
 for i=8:67
@@ -73,8 +73,8 @@ for i=8:67
     rh3(:,filtros3{i}) = rh3(:,filtros3{i}) + correction3.rh3(:,i-7);
 end
 save('correctedData3.mat', ...
-'horarios12','horarios12b','horarios3','meses12','meses3','horas12','horas3',...
-'nomes1','nomes2','nomes3','i12','i3','indices3de2','indices1raw',...
+'times12','horarios12b','times3','months12','months3','hours12','hours3',...
+'files1','files2','files3','i12','i3','indices3de2','indices1raw',...
 'z1','z2','rh1de2','P1de2','T1de2','P2','q2','q1de2','T2','rh2','P3','T3','rh3','q3','q1de3','rh1de3','T1de3','z3')
 
 % T2 = T2 + correction3.T2;
@@ -106,3 +106,4 @@ save('correctedData3.mat', ...
 %     end
 % end
 % %interpolate z2, rh2, T2?
+
